@@ -45,11 +45,11 @@ DelayFX::DelayFX()
     : m_pParams(nullptr)
     , m_pAllocator(nullptr)
     , m_pContext(nullptr)
-{
-}
+{}
 
 DelayFX::~DelayFX()
 {
+
 }
 
 AKRESULT DelayFX::Init(AK::IAkPluginMemAlloc* in_pAllocator, AK::IAkEffectPluginContext* in_pContext, AK::IAkPluginParam* in_pParams, AkAudioFormat& in_rFormat)
@@ -57,6 +57,16 @@ AKRESULT DelayFX::Init(AK::IAkPluginMemAlloc* in_pAllocator, AK::IAkEffectPlugin
     m_pParams = (DelayFXParams*)in_pParams;
     m_pAllocator = in_pAllocator;
     m_pContext = in_pContext;
+    
+    f_nSampleRate = in_rFormat.uSampleRate;
+    
+    myDelayLine.resize(2);
+    myDelayLine[0] = Delay(f_nSampleRate);
+    myDelayLine[0].PrepareToPlay(m_pParams->RTPC.fWet, m_pParams->RTPC.fFeedback, m_pParams->RTPC.fDelay);
+
+    myDelayLine[1] = Delay(f_nSampleRate);
+    myDelayLine[1].PrepareToPlay(m_pParams->RTPC.fWet, m_pParams->RTPC.fFeedback, m_pParams->RTPC.fDelay);
+
 
     return AK_Success;
 }
@@ -83,6 +93,7 @@ AKRESULT DelayFX::GetPluginInfo(AkPluginInfo& out_rPluginInfo)
 
 void DelayFX::Execute(AkAudioBuffer* io_pBuffer)
 {
+    //myDelayLine.PrepareToPlay();
     const AkUInt32 uNumChannels = io_pBuffer->NumChannels();
 
     AkUInt16 uFramesProcessed;
@@ -94,6 +105,8 @@ void DelayFX::Execute(AkAudioBuffer* io_pBuffer)
         while (uFramesProcessed < io_pBuffer->uValidFrames)
         {
             // Execute DSP in-place here
+            pBuf[uFramesProcessed] = myDelayLine[i].ProcessAudioFrame(pBuf[uFramesProcessed], uNumChannels, uNumChannels);
+           
             ++uFramesProcessed;
         }
     }

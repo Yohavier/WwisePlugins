@@ -28,6 +28,8 @@ the specific language governing permissions and limitations under the License.
 #define DelayFX_H
 
 #include "DelayFXParams.h"
+#include <vector>
+#include "Delay.h"
 
 /// See https://www.audiokinetic.com/library/edge/?source=SDK&id=soundengine__plugins__effects.html
 /// for the documentation about effect plug-ins
@@ -65,6 +67,9 @@ private:
     DelayFXParams* m_pParams;
     AK::IAkPluginMemAlloc* m_pAllocator;
     AK::IAkEffectPluginContext* m_pContext;
+
+    AkUInt32 f_nSampleRate;
+    std::vector<Delay> myDelayLine;
 };
 
 #endif // DelayFX_H

@@ -41,15 +41,41 @@ for the documentation about the plugin xml format
     </PluginInfo>
     <Properties>
       <!-- Add your property definitions here -->
-      <Property Name="Placeholder" Type="Real32" SupportRTPCType="Exclusive" DisplayName="Placeholder">
-        <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="10" />
+      <Property Name="fdelay" Type="Real32" SupportRTPCType="Exclusive" DisplayName="Delay in ms">
+        <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="2000" />
         <DefaultValue>0.0</DefaultValue>
         <AudioEnginePropertyID>0</AudioEnginePropertyID>
         <Restrictions>
           <ValueRestriction>
             <Range Type="Real32">
-              <Min>0.001</Min>
-              <Max>1000</Max>
+              <Min>0.0</Min>
+              <Max>2000</Max>
+            </Range>
+          </ValueRestriction>
+        </Restrictions>
+      </Property>
+      <Property Name="fFeedback" Type="Real32" SupportRTPCType="Exclusive" DisplayName="Feedback">
+        <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="100" />
+        <DefaultValue>0.0</DefaultValue>
+        <AudioEnginePropertyID>1</AudioEnginePropertyID>
+        <Restrictions>
+          <ValueRestriction>
+            <Range Type="Real32">
+              <Min>-100.0</Min>
+              <Max>100.0</Max>
+            </Range>
+          </ValueRestriction>
+        </Restrictions>
+      </Property>
+      <Property Name="fwet" Type="Real32" SupportRTPCType="Exclusive" DisplayName="Wet/Dry">
+        <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="100" />
+        <DefaultValue>50.0</DefaultValue>
+        <AudioEnginePropertyID>2</AudioEnginePropertyID>
+        <Restrictions>
+          <ValueRestriction>
+            <Range Type="Real32">
+              <Min>0.0</Min>
+              <Max>100</Max>
             </Range>
           </ValueRestriction>
         </Restrictions>

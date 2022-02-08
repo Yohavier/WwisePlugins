@@ -32,12 +32,16 @@ the specific language governing permissions and limitations under the License.
 
 // Add parameters IDs here, those IDs should map to the AudioEnginePropertyID
 // attributes in the xml property definition.
-static const AkPluginParamID PARAM_PLACEHOLDER_ID = 0;
-static const AkUInt32 NUM_PARAMS = 1;
+static const AkPluginParamID DELAY = 0;
+static const AkPluginParamID FEEDBACK = 1;
+static const AkPluginParamID WET = 2;
+static const AkUInt32 NUM_PARAMS = 3;
 
 struct DelayRTPCParams
 {
-    AkReal32 fPlaceholder;
+    AkReal32 fDelay;
+    AkReal32 fFeedback;
+    AkReal32 fWet;
 };
 
 struct DelayNonRTPCParams

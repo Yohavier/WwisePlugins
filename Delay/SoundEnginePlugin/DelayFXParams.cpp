@@ -53,7 +53,9 @@ AKRESULT DelayFXParams::Init(AK::IAkPluginMemAlloc* in_pAllocator, const void* i
     if (in_ulBlockSize == 0)
     {
         // Initialize default parameters here
-        RTPC.fPlaceholder = 0.0f;
+        RTPC.fDelay = 0.0f;
+        RTPC.fFeedback = 0.0f;
+        RTPC.fWet = 50.0f;
         m_paramChangeHandler.SetAllParamChanges();
         return AK_Success;
     }
@@ -73,7 +75,9 @@ AKRESULT DelayFXParams::SetParamsBlock(const void* in_pParamsBlock, AkUInt32 in_
     AkUInt8* pParamsBlock = (AkUInt8*)in_pParamsBlock;
 
     // Read bank data here
-    RTPC.fPlaceholder = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
+    RTPC.fDelay = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
+    RTPC.fFeedback = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
+    RTPC.fWet = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
     CHECKBANKDATASIZE(in_ulBlockSize, eResult);
     m_paramChangeHandler.SetAllParamChanges();
 
@@ -87,9 +91,17 @@ AKRESULT DelayFXParams::SetParam(AkPluginParamID in_paramID, const void* in_pVal
     // Handle parameter change here
     switch (in_paramID)
     {
-    case PARAM_PLACEHOLDER_ID:
-        RTPC.fPlaceholder = *((AkReal32*)in_pValue);
-        m_paramChangeHandler.SetParamChange(PARAM_PLACEHOLDER_ID);
+    case DELAY:
+        RTPC.fDelay = *((AkReal32*)in_pValue);
+        m_paramChangeHandler.SetParamChange(DELAY);
+        break;
+    case FEEDBACK:
+        RTPC.fFeedback = *((AkReal32*)in_pValue);
+        m_paramChangeHandler.SetParamChange(FEEDBACK);
+        break;
+    case WET:
+        RTPC.fWet = *((AkReal32*)in_pValue);
+        m_paramChangeHandler.SetParamChange(WET);
         break;
     default:
         eResult = AK_InvalidParameter;
