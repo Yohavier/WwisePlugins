@@ -26,6 +26,7 @@ public:
 private:
 	void CookVariables(float wetLevel, float feedback, float delay);
 	void ResetDelay();
+	float inline LinearInterpolation(float y0, float  x0, float  y1, float x1, float xp);
 	
 private:
 	AkUInt32 m_nSampleRate;
