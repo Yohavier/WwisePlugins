@@ -1,5 +1,6 @@
 #pragma once
 #include <string.h>
+#include "Biquad.h"
 #include <AK/SoundEngine/Common/IAkPlugin.h>
 
 class Delay
@@ -30,6 +31,9 @@ private:
 	
 private:
 	AkUInt32 m_nSampleRate;
+
+	Biquad* hs_Biquad;
+	Biquad* ls_Biquad;
 
 	float m_fDelayInSamples;
 	float m_fFeedback;

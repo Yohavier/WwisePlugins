@@ -45,7 +45,8 @@ DelayFX::DelayFX()
     : m_pParams(nullptr)
     , m_pAllocator(nullptr)
     , m_pContext(nullptr)
-{}
+{
+}
 
 DelayFX::~DelayFX()
 {

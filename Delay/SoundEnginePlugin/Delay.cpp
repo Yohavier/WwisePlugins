@@ -25,6 +25,12 @@ void Delay::CookVariables(float wetLevel, float feedback, float delay)
 
 void Delay::PrepareToPlay(float wetLevel, float feedback, float delay)
 {
+	hs_Biquad = new Biquad(m_nSampleRate, BiquadType::Highshelf);
+	ls_Biquad = new Biquad(m_nSampleRate, BiquadType::Lowshelf);
+	
+	hs_Biquad->ComputeCoeff(500.0f, 4.0f, 0.0f);
+	ls_Biquad->ComputeCoeff(1000.0f, 5.0f, -30.0f);
+
 	m_nBufferSize = 2 * m_nSampleRate;
 
 	if (m_pBuffer)
@@ -76,7 +82,7 @@ AkReal32 Delay::ProcessAudioFrame(AkReal32 frame, int uNumInputChannels, int uNu
 		yn = fInterp;
 	}
 
-	m_pBuffer[m_nWriteIndex] = xn + m_fFeedback * yn;
+	m_pBuffer[m_nWriteIndex] = ls_Biquad->ProcessSample(hs_Biquad->ProcessSample(xn + m_fFeedback * yn));
 
 
 	m_nWriteIndex++;
