@@ -2,6 +2,11 @@
 #include <string.h>
 #include <AK/SoundEngine/Common/IAkPlugin.h>
 
+enum ConvolutionType {
+	MovingAverageInterpolator,
+	MedianFilter,
+};
+
 class SimpleConvolution
 {
 public:
