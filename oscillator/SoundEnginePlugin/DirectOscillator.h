@@ -18,7 +18,7 @@ private:
 	float m_f_y_z1;
 	float m_f_y_z2;
 
-	float m_fFrequency_Hz = 700;
+	float m_fFrequency_Hz = 100;
 	int m_nSampleRate;
 
 	bool m_bRunOscillator;

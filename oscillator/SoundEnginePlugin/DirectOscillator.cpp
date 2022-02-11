@@ -1,5 +1,5 @@
 #include "DirectOscillator.h"
-
+//add Gordon-Smith Oscillator
 DirectOscillator::DirectOscillator(int sampleRate)
 {
 	m_nSampleRate = sampleRate;
@@ -16,11 +16,26 @@ DirectOscillator::DirectOscillator(int sampleRate)
 void DirectOscillator::CookFrequency()
 {
 	float f_wT = (2.0 * M_PI * m_fFrequency_Hz) / (float)m_nSampleRate;
+
 	m_f_b1 = -2.0 * cos(f_wT);
 	m_f_b2 = 1.0;
 
 	m_f_y_z1 = sin(-1.0 * f_wT);
 	m_f_y_z2 = sin(-2.0 * f_wT);
+
+	double wnT1 = asin(m_f_y_z1);
+	float n = wnT1 / f_wT;
+
+	if (m_f_y_z1 > m_f_y_z2)
+	{
+		n -= 1;
+	}
+	else
+	{
+		n += 1;
+	}
+
+	m_f_y_z2 = sin((n)*f_wT);
 }
 
 void DirectOscillator::PrepareToPlay()
