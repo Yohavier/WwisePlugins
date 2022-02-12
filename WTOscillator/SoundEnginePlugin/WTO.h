@@ -23,7 +23,7 @@ public:
 	~WTO();
 	WTO(int sampleRate);
 	void PrepareForPlay();
-	float ProcessAudioFrame();
+	float ProcessAudioFrame(int channelIndex);
 	void ChangeState(int state);
 	float m_Frequency_Hz = 200;
 	int m_nSampleRate;
@@ -35,6 +35,7 @@ private:
 	void Reset()
 	{
 		m_fReadIndex = 0;
+		m_fQuadPhaseReadIndex = 256.0;
 	}
 
 	//normal tables
@@ -49,10 +50,12 @@ private:
 	float* m_SquareArray_BL5;
 
 	float m_fReadIndex;
+	float m_fQuadPhaseReadIndex;
 
 	float m_f_inc;
 
 	bool m_bNoteOn =true;
+	bool m_bInvert;
 
 	OSCType oscType = square;
 	TableMode oscTableMode = normal;

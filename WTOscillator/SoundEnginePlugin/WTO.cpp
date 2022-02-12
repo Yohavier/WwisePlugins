@@ -2,10 +2,11 @@
 WTO::WTO(int sampleRate)
 {
 	m_fReadIndex = 0;
+	m_fQuadPhaseReadIndex = 0.0;
 	m_f_inc = 0;
 	m_bNoteOn = false;
 	m_nSampleRate = sampleRate;
-
+	m_bInvert = false;
 	//Triangle rise 1
 	float mt1 = 1.0 / 256.0;
 	float bt1 = 0.0;
@@ -127,52 +128,89 @@ void WTO::PrepareForPlay()
 	CookFrequency();
 }
 
-float WTO::ProcessAudioFrame()
+float WTO::ProcessAudioFrame(int channelIndex)
 {
 	float fOutSample = 0;
+	float fQuadSample = 0;
+
 	if (!m_bNoteOn)
 	{
 		return fOutSample;
 	}
 
 	int nReadIndex = (int)m_fReadIndex;
+	int nQuadPhaseReadIndex = (int)m_fQuadPhaseReadIndex;
+
 	float fFrac = m_fReadIndex - nReadIndex;
+
 	int nReadIndexNext = nReadIndex + 1 > 1023 ? 0 : nReadIndex + 1;
+	int nQuadPhaseReadIndexNext = nQuadPhaseReadIndex + 1 > 1023 ? 0 : nQuadPhaseReadIndex + 1;
 
 	switch (oscType)
 	{
 		case OSCType::saw:
-			if(oscTableMode == normal)
+			if (oscTableMode == normal)
+			{
 				fOutSample = LinearInterpolation(0, 1, m_SawToothArray[nReadIndex], m_SawToothArray[nReadIndexNext], fFrac);
+				fQuadSample = LinearInterpolation(0, 1, m_SawToothArray[nQuadPhaseReadIndex], m_SawToothArray[nQuadPhaseReadIndexNext], fFrac);
+			}
 			else
+			{
 				fOutSample = LinearInterpolation(0, 1, m_SawToothArray_BL5[nReadIndex], m_SawToothArray_BL5[nReadIndexNext], fFrac);
-			break;
-		case OSCType::sine:
-			fOutSample = LinearInterpolation(0, 1, m_SinArray[nReadIndex], m_SinArray[nReadIndexNext], fFrac);
-			break;
-		case OSCType::square:
-			if (oscTableMode == normal)
-				fOutSample = LinearInterpolation(0, 1, m_SquareArray[nReadIndex], m_SquareArray[nReadIndexNext], fFrac);
-			else
-				fOutSample = LinearInterpolation(0, 1, m_SquareArray_BL5[nReadIndex], m_SquareArray_BL5[nReadIndexNext], fFrac);
-			break;
-		case OSCType::triangle:
-			if (oscTableMode == normal)
-				fOutSample = LinearInterpolation(0, 1, m_TriangleArray[nReadIndex], m_TriangleArray[nReadIndexNext], fFrac);
-			else
-				fOutSample = LinearInterpolation(0, 1, m_TriangleArray_BL5[nReadIndex], m_TriangleArray_BL5[nReadIndexNext], fFrac);
-			break;
-		default:
-			fOutSample = LinearInterpolation(0, 1, m_SinArray[nReadIndex], m_SinArray[nReadIndexNext], fFrac);
+				fQuadSample = LinearInterpolation(0, 1, m_SawToothArray_BL5[nQuadPhaseReadIndex], m_SawToothArray_BL5[nQuadPhaseReadIndexNext], fFrac);
+			}
 			break;
 
+		case OSCType::sine:
+			fOutSample = LinearInterpolation(0, 1, m_SinArray[nReadIndex], m_SinArray[nReadIndexNext], fFrac);
+			fQuadSample = LinearInterpolation(0, 1, m_SinArray[nQuadPhaseReadIndex], m_SinArray[nQuadPhaseReadIndexNext], fFrac);
+			break;
+
+		case OSCType::square:
+			if (oscTableMode == normal)
+			{
+				fOutSample = LinearInterpolation(0, 1, m_SquareArray[nReadIndex], m_SquareArray[nReadIndexNext], fFrac);
+				fQuadSample = LinearInterpolation(0, 1, m_SquareArray[nQuadPhaseReadIndex], m_SquareArray[nQuadPhaseReadIndexNext], fFrac);
+			}
+			else
+			{
+				fOutSample = LinearInterpolation(0, 1, m_SquareArray_BL5[nReadIndex], m_SquareArray_BL5[nReadIndexNext], fFrac);
+				fQuadSample = LinearInterpolation(0, 1, m_SquareArray_BL5[nQuadPhaseReadIndex], m_SquareArray_BL5[nQuadPhaseReadIndexNext], fFrac);
+			}
+			break;
+
+		case OSCType::triangle:
+			if (oscTableMode == normal)
+			{
+				fOutSample = LinearInterpolation(0, 1, m_TriangleArray[nReadIndex], m_TriangleArray[nReadIndexNext], fFrac);
+				fQuadSample = LinearInterpolation(0, 1, m_TriangleArray[nQuadPhaseReadIndex], m_TriangleArray[nQuadPhaseReadIndexNext], fFrac);
+			}
+			else
+			{
+				fOutSample = LinearInterpolation(0, 1, m_TriangleArray_BL5[nReadIndex], m_TriangleArray_BL5[nReadIndexNext], fFrac);
+				fQuadSample = LinearInterpolation(0, 1, m_TriangleArray_BL5[nReadIndex], m_TriangleArray_BL5[nReadIndexNext], fFrac);
+			}		
+			break;
+
+		default:
+			fOutSample = LinearInterpolation(0, 1, m_SinArray[nReadIndex], m_SinArray[nReadIndexNext], fFrac);
+			fQuadSample = LinearInterpolation(0, 1, m_SinArray[nReadIndex], m_SinArray[nReadIndexNext], fFrac);
+			break;
 	}
 	
 	m_fReadIndex += m_f_inc;
+	m_fQuadPhaseReadIndex += m_f_inc;
+
 	if (m_fReadIndex > 1024)
 		m_fReadIndex = m_fReadIndex - 1024;
 
-	return fOutSample;
+	if (m_fQuadPhaseReadIndex > 1024)
+		m_fQuadPhaseReadIndex = m_fQuadPhaseReadIndex - 1024;
+
+	if (channelIndex == 0)
+		return fOutSample;
+	else
+		return fQuadSample;
 }
 
 void WTO::ChangeState(int state)

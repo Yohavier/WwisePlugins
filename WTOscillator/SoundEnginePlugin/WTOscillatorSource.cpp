@@ -101,7 +101,7 @@ void WTOscillatorSource::Execute(AkAudioBuffer* out_pBuffer)
         while (uFramesProduced < out_pBuffer->uValidFrames)
         {
             // Generate output here
-            *pBuf++ = myWTO->ProcessAudioFrame();
+            *pBuf++ = myWTO->ProcessAudioFrame(i);
             ++uFramesProduced;
         }
     }
