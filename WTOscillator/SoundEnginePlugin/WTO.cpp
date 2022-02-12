@@ -207,6 +207,12 @@ float WTO::ProcessAudioFrame(int channelIndex)
 	if (m_fQuadPhaseReadIndex > 1024)
 		m_fQuadPhaseReadIndex = m_fQuadPhaseReadIndex - 1024;
 
+	if (pol == Unipolar)
+	{
+		fOutSample = (fOutSample / 2.0) + 0.5;
+		fQuadSample = (fQuadSample / 2.0) + 0.5;
+	}
+
 	if (channelIndex == 0)
 		return fOutSample;
 	else

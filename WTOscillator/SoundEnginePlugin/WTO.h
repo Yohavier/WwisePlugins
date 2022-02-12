@@ -16,6 +16,12 @@ enum TableMode
 	bandlimit,
 };
 
+enum Polarity
+{
+	Bipolar,
+	Unipolar
+};
+
 class WTO
 {
 public:
@@ -57,7 +63,8 @@ private:
 	bool m_bNoteOn =true;
 	bool m_bInvert;
 
-	OSCType oscType = square;
+	OSCType oscType = sine;
 	TableMode oscTableMode = normal;
+	Polarity pol = Bipolar;
 };
 
