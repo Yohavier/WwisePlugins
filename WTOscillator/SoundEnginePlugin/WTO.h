@@ -10,6 +10,12 @@ enum OSCType
 	saw,
 };
 
+enum TableMode
+{
+	normal,
+	bandlimit,
+};
+
 class WTO
 {
 public:
@@ -31,10 +37,16 @@ private:
 		m_fReadIndex = 0;
 	}
 
+	//normal tables
 	float* m_SinArray;
 	float* m_SawToothArray;
 	float* m_TriangleArray;
 	float* m_SquareArray;
+
+	//band limited tables to 5 partials
+	float* m_SawToothArray_BL5;
+	float* m_TriangleArray_BL5;
+	float* m_SquareArray_BL5;
 
 	float m_fReadIndex;
 
@@ -42,6 +54,7 @@ private:
 
 	bool m_bNoteOn =true;
 
-	OSCType oscType = saw;
+	OSCType oscType = square;
+	TableMode oscTableMode = normal;
 };
 

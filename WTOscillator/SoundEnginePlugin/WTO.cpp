@@ -27,14 +27,69 @@ WTO::WTO(int sampleRate)
 	float ms2 = 1.0 / 512.0;
 	float bs2 = -1.0;
 
+	float fMaxTri = 0;
+	float fMaxSqr = 0;
+	float fMaxSaw = 0;
+
 	m_SinArray = new float[1024];
 	m_TriangleArray = new float[1024];
 	m_SawToothArray = new float[1024];
 	m_SquareArray = new float[1024];
 
+	m_SawToothArray_BL5 = new float[1024];
+	m_SquareArray_BL5 = new float[1024];
+	m_TriangleArray_BL5 = new float[1024];
+
 	for (int i = 0; i < 1024; i++)
 	{
 		m_SinArray[i] = sin(((float)i / 1024.0) * (2 * M_PI));
+
+		if (i == 1)
+			m_SquareArray[i] = 0.0;
+		else
+			m_SquareArray[i] = i < 512 ? 1.0 : -1.0;
+		
+		m_SawToothArray_BL5[i] = 0.0;
+		m_SquareArray_BL5[i] = 0.0;
+		m_TriangleArray_BL5[i] = 0.0;
+
+		for (int g = 1; g < 6; g++)
+		{
+			double n = double(g);
+			m_SawToothArray_BL5[i] += pow((float)-1.0, (float)(g + 1)) * (1.0 / n) * sin(2.0 * M_PI * i * n / 1024.0);
+		}
+
+		for (int g = 0; g == 3; g++)
+		{
+			double n = double(g);
+			m_TriangleArray_BL5[i] += pow((float)-1.0, (float)n) * (1.0 / pow((float)(2 * n + 1), (float)2.0)) * sin(2.0 * M_PI * (2.0 * n + 1) * i / 1024);
+		}
+
+		for (int g = 1; g <= 5; g += 2)
+		{
+			double n = double(g);
+			m_SquareArray_BL5[i] += (1.0 / n) * sin(2.0 * M_PI * i * n / 1024.0);
+		}
+		
+		if (i == 0)
+		{
+			fMaxSaw = m_SawToothArray_BL5[i];
+			fMaxSqr = m_SquareArray_BL5[i];
+			fMaxTri = m_TriangleArray_BL5[i];
+		}
+		else
+		{
+			if (m_SawToothArray_BL5[i] > fMaxSaw)
+				fMaxSaw = m_SawToothArray_BL5[i];
+
+			if (m_TriangleArray_BL5[i] > fMaxTri)
+				fMaxTri = m_TriangleArray_BL5[i];
+
+			if (m_SquareArray_BL5[i] > fMaxSqr)
+				fMaxSqr = m_SquareArray_BL5[i];
+		}
+
+
 		m_SawToothArray[i] = i < 512 ? ms1 * i + bs1 : ms2 * (i - 511) + bs2;
 
 		if (i < 256)
@@ -49,8 +104,13 @@ WTO::WTO(int sampleRate)
 		{
 			m_TriangleArray[i] = mt2 * (i - 768) + bt2;
 		}
+	}
 
-		m_SquareArray[i] = i < 512 ? 1.0 : -1.0;
+	for (int i = 0; i < 1024; i++)
+	{
+		m_SawToothArray_BL5[i] /= fMaxSaw;
+		m_SquareArray_BL5[i] /= fMaxSqr;
+		m_TriangleArray_BL5[i] /= fMaxTri;
 	}
 
 	CookFrequency();
@@ -82,16 +142,25 @@ float WTO::ProcessAudioFrame()
 	switch (oscType)
 	{
 		case OSCType::saw:
-			fOutSample = LinearInterpolation(0, 1, m_SawToothArray[nReadIndex], m_SawToothArray[nReadIndexNext], fFrac);
+			if(oscTableMode == normal)
+				fOutSample = LinearInterpolation(0, 1, m_SawToothArray[nReadIndex], m_SawToothArray[nReadIndexNext], fFrac);
+			else
+				fOutSample = LinearInterpolation(0, 1, m_SawToothArray_BL5[nReadIndex], m_SawToothArray_BL5[nReadIndexNext], fFrac);
 			break;
 		case OSCType::sine:
 			fOutSample = LinearInterpolation(0, 1, m_SinArray[nReadIndex], m_SinArray[nReadIndexNext], fFrac);
 			break;
 		case OSCType::square:
-			fOutSample = LinearInterpolation(0, 1, m_SquareArray[nReadIndex], m_SquareArray[nReadIndexNext], fFrac);
+			if (oscTableMode == normal)
+				fOutSample = LinearInterpolation(0, 1, m_SquareArray[nReadIndex], m_SquareArray[nReadIndexNext], fFrac);
+			else
+				fOutSample = LinearInterpolation(0, 1, m_SquareArray_BL5[nReadIndex], m_SquareArray_BL5[nReadIndexNext], fFrac);
 			break;
 		case OSCType::triangle:
-			fOutSample = LinearInterpolation(0, 1, m_TriangleArray[nReadIndex], m_TriangleArray[nReadIndexNext], fFrac);
+			if (oscTableMode == normal)
+				fOutSample = LinearInterpolation(0, 1, m_TriangleArray[nReadIndex], m_TriangleArray[nReadIndexNext], fFrac);
+			else
+				fOutSample = LinearInterpolation(0, 1, m_TriangleArray_BL5[nReadIndex], m_TriangleArray_BL5[nReadIndexNext], fFrac);
 			break;
 		default:
 			fOutSample = LinearInterpolation(0, 1, m_SinArray[nReadIndex], m_SinArray[nReadIndexNext], fFrac);
