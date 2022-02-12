@@ -60,11 +60,14 @@ AKRESULT WTOscillatorSource::Init(AK::IAkPluginMemAlloc* in_pAllocator, AK::IAkS
 
     m_durationHandler.Setup(m_pParams->RTPC.fDuration, in_pContext->GetNumLoops(), in_rFormat.uSampleRate);
 
+    myWTO = new WTO(in_rFormat.uSampleRate);
+    myWTO->ChangeState(1);
     return AK_Success;
 }
 
 AKRESULT WTOscillatorSource::Term(AK::IAkPluginMemAlloc* in_pAllocator)
 {
+    myWTO->ChangeState(2);
     AK_PLUGIN_DELETE(in_pAllocator, this);
     return AK_Success;
 }
@@ -98,7 +101,7 @@ void WTOscillatorSource::Execute(AkAudioBuffer* out_pBuffer)
         while (uFramesProduced < out_pBuffer->uValidFrames)
         {
             // Generate output here
-            *pBuf++ = 0.0f;
+            *pBuf++ = myWTO->ProcessAudioFrame();
             ++uFramesProduced;
         }
     }

@@ -28,7 +28,7 @@ the specific language governing permissions and limitations under the License.
 #define WTOscillatorSource_H
 
 #include "WTOscillatorSourceParams.h"
-
+#include "WTO.h"
 #include <AK/Plugin/PluginServices/AkFXDurationHandler.h>
 
 /// See https://www.audiokinetic.com/library/edge/?source=SDK&id=soundengine__plugins__source.html
@@ -66,6 +66,9 @@ private:
     AK::IAkPluginMemAlloc* m_pAllocator;
     AK::IAkSourcePluginContext* m_pContext;
     AkFXDurationHandler m_durationHandler;
+
+    WTO* myWTO;
+
 };
 
 #endif // WTOscillatorSource_H
