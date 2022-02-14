@@ -37,7 +37,7 @@ for the documentation about the plugin xml format
     </PluginInfo>
     <Properties>
       <!-- Add your property definitions here -->
-      <Property Name="Duration" Type="Real32" SupportRTPCType="Exclusive" DisplayName="Duration">
+      <Property Name="Duration" Type="Real32" DisplayName="Duration">
         <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="10" />
         <DefaultValue>0.0</DefaultValue>
         <AudioEnginePropertyID>0</AudioEnginePropertyID>
@@ -46,6 +46,49 @@ for the documentation about the plugin xml format
             <Range Type="Real32">
               <Min>0.001</Min>
               <Max>1000</Max>
+            </Range>
+          </ValueRestriction>
+        </Restrictions>
+      </Property>
+      <Property Name="m_oscillationType" Type="Real32" DisplayName="Oscillation Type">
+        <DefaultValue>0</DefaultValue>
+        <AudioEnginePropertyID>1</AudioEnginePropertyID>
+        <Restrictions>
+          <ValueRestriction>
+            <Enumeration Type="Real32">
+              <Value DisplayName="Sine">0</Value>
+              <Value DisplayName="Square">1</Value>
+              <Value DisplayName="Triangle">2</Value>
+              <Value DisplayName="Saw Tooth">3</Value>
+            </Enumeration>
+          </ValueRestriction>
+        </Restrictions>
+      </Property>
+      <Property Name="m_Polarity" Type="Real32" DisplayName="Polarity">
+        <DefaultValue>0</DefaultValue>
+        <AudioEnginePropertyID>2</AudioEnginePropertyID>
+        <Restrictions>
+          <ValueRestriction>
+            <Enumeration Type="Real32">
+              <Value DisplayName="Unipolar">0</Value>
+              <Value DisplayName="Bipolar">1</Value>
+            </Enumeration>
+          </ValueRestriction>
+        </Restrictions>
+      </Property>
+      <Property Name="m_Bandlimit" Type="bool" DisplayName="Bandlimit">
+        <DefaultValue>False</DefaultValue>
+        <AudioEnginePropertyID>3</AudioEnginePropertyID>
+      </Property>
+      <Property Name="m_Frequency" Type="Real32" DisplayName="Frequency">
+        <UserInterface Step="0.1" Fine="0.001" Decimals="3" UIMax="20000" />
+        <DefaultValue>0.0</DefaultValue>
+        <AudioEnginePropertyID>4</AudioEnginePropertyID>
+        <Restrictions>
+          <ValueRestriction>
+            <Range Type="Real32">
+              <Min>0.001</Min>
+              <Max>20000</Max>
             </Range>
           </ValueRestriction>
         </Restrictions>

@@ -6,7 +6,7 @@ WTO::WTO(int sampleRate)
 	m_f_inc = 0;
 	m_bNoteOn = false;
 	m_nSampleRate = sampleRate;
-	m_bInvert = false;
+
 	//Triangle rise 1
 	float mt1 = 1.0 / 256.0;
 	float bt1 = 0.0;
@@ -119,13 +119,7 @@ WTO::WTO(int sampleRate)
 
 void WTO::CookFrequency()
 {
-	m_f_inc = 1024 * m_Frequency_Hz / (float)m_nSampleRate;
-}
-
-void WTO::PrepareForPlay()
-{
-	Reset();
-	CookFrequency();
+	m_f_inc = 1024 * m_fFrequencyHz / (float)m_nSampleRate;
 }
 
 float WTO::ProcessAudioFrame(int channelIndex)
@@ -146,10 +140,10 @@ float WTO::ProcessAudioFrame(int channelIndex)
 	int nReadIndexNext = nReadIndex + 1 > 1023 ? 0 : nReadIndex + 1;
 	int nQuadPhaseReadIndexNext = nQuadPhaseReadIndex + 1 > 1023 ? 0 : nQuadPhaseReadIndex + 1;
 
-	switch (oscType)
+	switch (m_OscillatioType)
 	{
 		case OSCType::saw:
-			if (oscTableMode == normal)
+			if (!m_bBandlimit)
 			{
 				fOutSample = LinearInterpolation(0, 1, m_SawToothArray[nReadIndex], m_SawToothArray[nReadIndexNext], fFrac);
 				fQuadSample = LinearInterpolation(0, 1, m_SawToothArray[nQuadPhaseReadIndex], m_SawToothArray[nQuadPhaseReadIndexNext], fFrac);
@@ -167,7 +161,7 @@ float WTO::ProcessAudioFrame(int channelIndex)
 			break;
 
 		case OSCType::square:
-			if (oscTableMode == normal)
+			if (!m_bBandlimit)
 			{
 				fOutSample = LinearInterpolation(0, 1, m_SquareArray[nReadIndex], m_SquareArray[nReadIndexNext], fFrac);
 				fQuadSample = LinearInterpolation(0, 1, m_SquareArray[nQuadPhaseReadIndex], m_SquareArray[nQuadPhaseReadIndexNext], fFrac);
@@ -180,7 +174,7 @@ float WTO::ProcessAudioFrame(int channelIndex)
 			break;
 
 		case OSCType::triangle:
-			if (oscTableMode == normal)
+			if (!m_bBandlimit)
 			{
 				fOutSample = LinearInterpolation(0, 1, m_TriangleArray[nReadIndex], m_TriangleArray[nReadIndexNext], fFrac);
 				fQuadSample = LinearInterpolation(0, 1, m_TriangleArray[nQuadPhaseReadIndex], m_TriangleArray[nQuadPhaseReadIndexNext], fFrac);
@@ -207,7 +201,7 @@ float WTO::ProcessAudioFrame(int channelIndex)
 	if (m_fQuadPhaseReadIndex > 1024)
 		m_fQuadPhaseReadIndex = m_fQuadPhaseReadIndex - 1024;
 
-	if (pol == Unipolar)
+	if (m_Polarity == unipolar)
 	{
 		fOutSample = (fOutSample / 2.0) + 0.5;
 		fQuadSample = (fQuadSample / 2.0) + 0.5;
@@ -219,7 +213,7 @@ float WTO::ProcessAudioFrame(int channelIndex)
 		return fQuadSample;
 }
 
-void WTO::ChangeState(int state)
+void WTO::ChangePlayingState(int state)
 {
 	switch (state)
 	{
@@ -239,6 +233,15 @@ void WTO::ChangeState(int state)
 	}
 }
 
+void WTO::ChangeParameters(float fFrequency, float fOscillationType, float fPolarity, bool bBandlimit)
+{
+	m_fFrequencyHz = fFrequency;
+	m_OscillatioType = static_cast<OSCType>(fOscillationType);
+	m_Polarity = static_cast<Polarity>(fPolarity);
+	m_bBandlimit = bBandlimit;
+	CookFrequency();
+}
+
 float inline WTO::LinearInterpolation(float x0, float  x1, float  y0, float y1, float xp)
 {
 	return y0 + ((y1 - y0) / (x1 - x0)) * (xp - x0);
@@ -250,4 +253,7 @@ WTO::~WTO()
 	delete m_SquareArray;
 	delete m_TriangleArray;
 	delete m_SinArray;
+	delete m_SawToothArray_BL5;
+	delete m_TriangleArray_BL5;
+	delete m_SquareArray_BL5;
 }

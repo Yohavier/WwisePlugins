@@ -1,25 +1,20 @@
 #pragma once
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <AK/SoundEngine/Common/IAkPlugin.h>
 
 enum OSCType
 { 
 	sine,
 	square,
 	triangle,
-	saw,
-};
-
-enum TableMode
-{
-	normal,
-	bandlimit,
+	saw
 };
 
 enum Polarity
 {
-	Bipolar,
-	Unipolar
+	bipolar,
+	unipolar
 };
 
 class WTO
@@ -28,10 +23,11 @@ public:
 	WTO() = default;
 	~WTO();
 	WTO(int sampleRate);
-	void PrepareForPlay();
+
 	float ProcessAudioFrame(int channelIndex);
-	void ChangeState(int state);
-	float m_Frequency_Hz = 200;
+	void ChangePlayingState(int state);
+	void ChangeParameters(float fFrequency, float fOscillationType, float fPolarity, bool bBandlimit);
+	
 	int m_nSampleRate;
 
 private:
@@ -61,10 +57,11 @@ private:
 	float m_f_inc;
 
 	bool m_bNoteOn =true;
-	bool m_bInvert;
 
-	OSCType oscType = sine;
-	TableMode oscTableMode = normal;
-	Polarity pol = Bipolar;
+
+	float m_fFrequencyHz;
+	OSCType m_OscillatioType;
+	Polarity m_Polarity;
+	bool m_bBandlimit;
 };
 

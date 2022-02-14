@@ -39,7 +39,10 @@ bool WTOscillatorPlugin::GetBankParameters(const GUID & in_guidPlatform, AK::Wwi
 {
     // Write bank data here
     in_dataWriter.WriteReal32(m_propertySet.GetReal32(in_guidPlatform, "Duration"));
-
+    in_dataWriter.WriteReal32(m_propertySet.GetReal32(in_guidPlatform, "m_OscillationType"));
+    in_dataWriter.WriteReal32(m_propertySet.GetReal32(in_guidPlatform, "m_Polaritry"));
+    in_dataWriter.WriteBool(m_propertySet.GetBool(in_guidPlatform, "m_Bandlimit"));
+    in_dataWriter.WriteReal32(m_propertySet.GetReal32(in_guidPlatform, "m_Frequency"));
     return true;
 }
 

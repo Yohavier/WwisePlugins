@@ -53,7 +53,11 @@ AKRESULT WTOscillatorSourceParams::Init(AK::IAkPluginMemAlloc* in_pAllocator, co
     if (in_ulBlockSize == 0)
     {
         // Initialize default parameters here
-        RTPC.fDuration = 0.0f;
+        RTPC.m_fDuration = 0.0f;
+        RTPC.m_bBandlimit = false;
+        RTPC.m_fPolarity = 0;
+        RTPC.m_fOscillationType = 0;
+        RTPC.m_fFrequency = 0.1;
         m_paramChangeHandler.SetAllParamChanges();
         return AK_Success;
     }
@@ -73,7 +77,11 @@ AKRESULT WTOscillatorSourceParams::SetParamsBlock(const void* in_pParamsBlock, A
     AkUInt8* pParamsBlock = (AkUInt8*)in_pParamsBlock;
 
     // Read bank data here
-    RTPC.fDuration = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
+    RTPC.m_fDuration = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
+    RTPC.m_bBandlimit = READBANKDATA(bool, pParamsBlock, in_ulBlockSize);
+    RTPC.m_fFrequency = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
+    RTPC.m_fOscillationType = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
+    RTPC.m_fPolarity = READBANKDATA(AkReal32, pParamsBlock, in_ulBlockSize);
     CHECKBANKDATASIZE(in_ulBlockSize, eResult);
     m_paramChangeHandler.SetAllParamChanges();
 
@@ -88,8 +96,24 @@ AKRESULT WTOscillatorSourceParams::SetParam(AkPluginParamID in_paramID, const vo
     switch (in_paramID)
     {
     case PARAM_DURATION_ID:
-        RTPC.fDuration = *((AkReal32*)in_pValue);
+        RTPC.m_fDuration = *((AkReal32*)in_pValue);
         m_paramChangeHandler.SetParamChange(PARAM_DURATION_ID);
+        break;
+    case PARAM_OSCILLATIONTYPE_ID:
+        RTPC.m_fOscillationType = *((AkReal32*)in_pValue);
+        m_paramChangeHandler.SetParamChange(PARAM_OSCILLATIONTYPE_ID);
+        break;
+    case PARAM_POLARITY_ID:
+        RTPC.m_fPolarity = *((AkReal32*)in_pValue);
+        m_paramChangeHandler.SetParamChange(PARAM_POLARITY_ID);
+        break;
+    case PARAM_BANDLIMIT_ID:
+        RTPC.m_bBandlimit = *((bool*)in_pValue);
+        m_paramChangeHandler.SetParamChange(PARAM_BANDLIMIT_ID);
+        break;
+    case PARAM_FREQUENCY_ID:    
+        RTPC.m_fFrequency = *((AkReal32*)in_pValue);
+        m_paramChangeHandler.SetParamChange(PARAM_FREQUENCY_ID);
         break;
     default:
         eResult = AK_InvalidParameter;

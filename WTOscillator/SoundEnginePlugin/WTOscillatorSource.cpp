@@ -58,16 +58,18 @@ AKRESULT WTOscillatorSource::Init(AK::IAkPluginMemAlloc* in_pAllocator, AK::IAkS
     m_pAllocator = in_pAllocator;
     m_pContext = in_pContext;
 
-    m_durationHandler.Setup(m_pParams->RTPC.fDuration, in_pContext->GetNumLoops(), in_rFormat.uSampleRate);
+    m_durationHandler.Setup(m_pParams->RTPC.m_fDuration, in_pContext->GetNumLoops(), in_rFormat.uSampleRate);
 
     myWTO = new WTO(in_rFormat.uSampleRate);
-    myWTO->ChangeState(1);
+    myWTO->ChangePlayingState(1);
+    myWTO->ChangeParameters(m_pParams->RTPC.m_fFrequency, m_pParams->RTPC.m_fOscillationType, m_pParams->RTPC.m_fPolarity, m_pParams->RTPC.m_bBandlimit);
     return AK_Success;
 }
 
 AKRESULT WTOscillatorSource::Term(AK::IAkPluginMemAlloc* in_pAllocator)
 {
-    myWTO->ChangeState(2);
+    myWTO->ChangePlayingState(2);
+    myWTO->~WTO();
     AK_PLUGIN_DELETE(in_pAllocator, this);
     return AK_Success;
 }
@@ -87,12 +89,18 @@ AKRESULT WTOscillatorSource::GetPluginInfo(AkPluginInfo& out_rPluginInfo)
 
 void WTOscillatorSource::Execute(AkAudioBuffer* out_pBuffer)
 {
-    m_durationHandler.SetDuration(m_pParams->RTPC.fDuration);
+    m_durationHandler.SetDuration(m_pParams->RTPC.m_fDuration);
     m_durationHandler.ProduceBuffer(out_pBuffer);
 
     const AkUInt32 uNumChannels = out_pBuffer->NumChannels();
 
     AkUInt16 uFramesProduced;
+
+    if (m_pParams->m_paramChangeHandler.HasAnyChanged())
+    {
+        myWTO->ChangeParameters(m_pParams->RTPC.m_fFrequency, m_pParams->RTPC.m_fOscillationType, m_pParams->RTPC.m_fPolarity, m_pParams->RTPC.m_bBandlimit);
+    }
+
     for (AkUInt32 i = 0; i < uNumChannels; ++i)
     {
         AkReal32* AK_RESTRICT pBuf = (AkReal32* AK_RESTRICT)out_pBuffer->GetChannel(i);
